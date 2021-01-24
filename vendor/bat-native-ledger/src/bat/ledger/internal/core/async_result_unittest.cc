@@ -1,0 +1,41 @@
+/* Copyright (c) 2021 The Brave Authors. All rights reserved.
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+#include "base/test/bind.h"
+#include "base/test/task_environment.h"
+#include "bat/ledger/internal/core/async_result.h"
+#include "testing/gtest/include/gtest/gtest.h"
+
+namespace ledger {
+
+class AsyncResultTest : public testing::Test {
+ protected:
+  base::test::TaskEnvironment task_environment_;
+};
+
+TEST_F(AsyncResultTest, CompleteResultSentInFutureTurn) {
+  AsyncResult<int>::Resolver resolver;
+  resolver.Complete(10);
+  int value = 0;
+  resolver.result().Listen(
+      base::BindLambdaForTesting([&value](const int& v) { value = v; }));
+  ASSERT_EQ(value, 0);
+  task_environment_.RunUntilIdle();
+  ASSERT_EQ(value, 10);
+}
+
+TEST_F(AsyncResultTest, ErrorResultSentInFutureTurn) {
+  AsyncResult<int, int>::Resolver resolver;
+  resolver.Error(-1);
+  int value = 0;
+  resolver.result().Listen(
+      base::DoNothing(),
+      base::BindLambdaForTesting([&value](const int& v) { value = v; }));
+  ASSERT_EQ(value, 0);
+  task_environment_.RunUntilIdle();
+  ASSERT_EQ(value, -1);
+}
+
+}  // namespace ledger

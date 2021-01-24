@@ -18,6 +18,7 @@ source_set("brave_rewards_unit_tests") {
       "//brave/components/l10n/browser/locale_helper_mock.h",
       "//brave/vendor/bat-native-ledger/src/bat/ledger/internal/contribution/contribution_monthly_util_unittest.cc",
       "//brave/vendor/bat-native-ledger/src/bat/ledger/internal/contribution/contribution_unblinded_unittest.cc",
+      "//brave/vendor/bat-native-ledger/src/bat/ledger/internal/core/async_result_unittest.cc",
       "//brave/vendor/bat-native-ledger/src/bat/ledger/internal/credentials/credentials_util_unittest.cc",
       "//brave/vendor/bat-native-ledger/src/bat/ledger/internal/database/database_activity_info_unittest.cc",
       "//brave/vendor/bat-native-ledger/src/bat/ledger/internal/database/database_balance_report_info_unittest.cc",
