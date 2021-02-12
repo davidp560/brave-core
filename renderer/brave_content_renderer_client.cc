@@ -26,6 +26,9 @@ SetRuntimeFeaturesDefaultsBeforeBlinkInitialization() {
   blink::WebRuntimeFeatures::EnableFeatureFromString(
       "FileSystemAccessAPIExperimental", false);
   blink::WebRuntimeFeatures::EnableFeatureFromString("Serial", false);
+  blink::WebRuntimeFeatures::EnableFeatureFromString("TrustTokens", false);
+  blink::WebRuntimeFeatures::EnableFeatureFromString(
+      "TrustTokensAlwaysAllowIssuance", false);
 }
 
 BraveContentRendererClient::~BraveContentRendererClient() = default;
