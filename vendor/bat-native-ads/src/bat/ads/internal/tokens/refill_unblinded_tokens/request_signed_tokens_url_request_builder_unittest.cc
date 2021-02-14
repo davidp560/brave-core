@@ -100,7 +100,7 @@ TEST_F(BatAdsRequestSignedTokensUrlRequestBuilderTest, BuildUrlForRPill) {
       R"(digest: SHA-256=Sxq6H/YDThn/m2RSXsTzewSzKfAuGLh09w7m59VBYwU=)",
       R"(signature: keyId="primary",algorithm="ed25519",headers="digest",signature="zImEsG3U2K2jROcUOerWMgzA+LyEoDqqYcr9svpnaEDNOYLzGn67qiz+HIFlqSjzy6Q9RPdU+h3VaFrIspsfCQ==")",
       R"(content-type: application/json)",
-      R"(Via: 1.1 brave, 1.1 ads-serve.brave.com (Apache/1.1))",
+      R"(Via: 1.3 brave, 1.1 ads-serve.brave.com (Apache/1.2))",
       R"(accept: application/json)"};
   expected_url_request->content =
       R"({"blindedTokens":["iEK4BXJINfAa0kzgpnnukGUAHvH5303+Y/msR5+u/nY=","eAAv7FNH2twpELsYf3glHLlOhnnlIMovIeEgEmcjgyo=","1G0+8546Y6jCIUXG0cKJq0qpkd6NsnG+4w9oSVW3gH8="]})";
@@ -139,7 +139,7 @@ TEST_F(BatAdsRequestSignedTokensUrlRequestBuilderTest, BuildUrlForBPill) {
       R"(digest: SHA-256=Sxq6H/YDThn/m2RSXsTzewSzKfAuGLh09w7m59VBYwU=)",
       R"(signature: keyId="primary",algorithm="ed25519",headers="digest",signature="zImEsG3U2K2jROcUOerWMgzA+LyEoDqqYcr9svpnaEDNOYLzGn67qiz+HIFlqSjzy6Q9RPdU+h3VaFrIspsfCQ==")",
       R"(content-type: application/json)",
-      R"(Via: 1.0 brave, 1.1 ads-serve.brave.com (Apache/1.1))",
+      R"(Via: 1.1 brave, 1.1 ads-serve.brave.com (Apache/1.2))",
       R"(accept: application/json)"};
   expected_url_request->content =
       R"({"blindedTokens":["iEK4BXJINfAa0kzgpnnukGUAHvH5303+Y/msR5+u/nY=","eAAv7FNH2twpELsYf3glHLlOhnnlIMovIeEgEmcjgyo=","1G0+8546Y6jCIUXG0cKJq0qpkd6NsnG+4w9oSVW3gH8="]})";

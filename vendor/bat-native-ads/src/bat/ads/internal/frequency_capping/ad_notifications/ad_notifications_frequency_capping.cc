@@ -31,7 +31,6 @@
 #include "bat/ads/internal/frequency_capping/permission_rules/network_connection_frequency_cap.h"
 #include "bat/ads/internal/frequency_capping/permission_rules/permission_rule_util.h"
 #include "bat/ads/internal/frequency_capping/permission_rules/unblinded_tokens_frequency_cap.h"
-#include "bat/ads/internal/frequency_capping/permission_rules/user_activity_frequency_cap.h"
 #include "bat/ads/internal/logging.h"
 
 namespace ads {
@@ -74,11 +73,6 @@ bool FrequencyCapping::IsAdAllowed() {
 
   UnblindedTokensFrequencyCap unblinded_tokens_frequency_cap;
   if (!ShouldAllow(&unblinded_tokens_frequency_cap)) {
-    return false;
-  }
-
-  UserActivityFrequencyCap user_activity_frequency_cap;
-  if (!ShouldAllow(&user_activity_frequency_cap)) {
     return false;
   }
 

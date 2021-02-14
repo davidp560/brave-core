@@ -212,6 +212,7 @@ AdsServiceImpl::AdsServiceImpl(Profile* profile)
            base::TaskShutdownBehavior::BLOCK_SHUTDOWN})),
       base_path_(profile_->GetPath().AppendASCII("ads_service")),
       last_idle_state_(ui::IdleState::IDLE_STATE_ACTIVE),
+      last_idle_time_(0),
       display_service_(NotificationDisplayService::GetForProfile(profile_)),
       rewards_service_(
           brave_rewards::RewardsServiceFactory::GetForProfile(profile_)),
@@ -309,6 +310,8 @@ void AdsServiceImpl::ChangeLocale(const std::string& locale) {
 }
 
 void AdsServiceImpl::OnPageLoaded(const SessionID& tab_id,
+                                  const int32_t page_transition_type,
+                                  const bool has_user_gesture,
                                   const std::vector<GURL>& redirect_chain,
                                   const std::string& content) {
   if (!connected()) {
@@ -320,7 +323,8 @@ void AdsServiceImpl::OnPageLoaded(const SessionID& tab_id,
     redirect_chain_as_strings.push_back(url.spec());
   }
 
-  bat_ads_->OnPageLoaded(tab_id.id(), redirect_chain_as_strings, content);
+  bat_ads_->OnPageLoaded(tab_id.id(), page_transition_type, has_user_gesture,
+                         redirect_chain_as_strings, content);
 }
 
 void AdsServiceImpl::OnMediaStart(const SessionID& tab_id) {
@@ -613,7 +617,7 @@ void AdsServiceImpl::Initialize() {
       base::Bind(&AdsServiceImpl::OnPrefsChanged, base::Unretained(this)));
 
   profile_pref_change_registrar_.Add(
-      ads::prefs::kIdleThreshold,
+      ads::prefs::kIdleTimeThreshold,
       base::Bind(&AdsServiceImpl::OnPrefsChanged, base::Unretained(this)));
 
   profile_pref_change_registrar_.Add(
@@ -893,26 +897,43 @@ void AdsServiceImpl::StartCheckIdleStateTimer() {
 }
 
 void AdsServiceImpl::CheckIdleState() {
-  auto idle_state = ui::CalculateIdleState(GetIdleThreshold());
-  ProcessIdleState(idle_state);
+  const int idle_threshold = GetIdleTimeThreshold();
+  const ui::IdleState idle_state = ui::CalculateIdleState(idle_threshold);
+  ProcessIdleState(idle_state, last_idle_time_);
+
+  last_idle_time_ = ui::CalculateIdleTime();
 }
 
-void AdsServiceImpl::ProcessIdleState(const ui::IdleState idle_state) {
+void AdsServiceImpl::ProcessIdleState(const ui::IdleState idle_state,
+                                      const int idle_time) {
   if (!connected() || idle_state == last_idle_state_) {
     return;
   }
 
-  if (idle_state == ui::IdleState::IDLE_STATE_ACTIVE) {
-    bat_ads_->OnUnIdle();
-  } else {
-    bat_ads_->OnIdle();
+  switch (idle_state) {
+    case ui::IdleState::IDLE_STATE_ACTIVE: {
+      const bool was_locked =
+          last_idle_state_ == ui::IdleState::IDLE_STATE_LOCKED;
+      bat_ads_->OnUnIdle(idle_time, was_locked);
+      break;
+    }
+
+    case ui::IdleState::IDLE_STATE_IDLE:
+    case ui::IdleState::IDLE_STATE_LOCKED: {
+      bat_ads_->OnIdle();
+      break;
+    }
+
+    case ui::IdleState::IDLE_STATE_UNKNOWN: {
+      break;
+    }
   }
 
   last_idle_state_ = idle_state;
 }
 
-int AdsServiceImpl::GetIdleThreshold() {
-  return GetIntegerPref(ads::prefs::kIdleThreshold);
+int AdsServiceImpl::GetIdleTimeThreshold() {
+  return GetIntegerPref(ads::prefs::kIdleTimeThreshold);
 }
 
 void AdsServiceImpl::OnShow(Profile* profile, const std::string& uuid) {
@@ -1554,17 +1575,17 @@ bool AdsServiceImpl::IsUpgradingFromPreBraveAdsBuild() {
   // Brave ads was hidden in 0.62.x however due to a bug |prefs::kEnabled| was
   // set to true causing "https://github.com/brave/brave-browser/issues/5434"
 
-  // |prefs::kIdleThreshold| was not serialized in 0.62.x
+  // |prefs::kIdleTimeThreshold| was not serialized in 0.62.x
 
   // |prefs::kVersion| was introduced in 0.63.x
 
   // We can detect if we are upgrading from a pre Brave ads build by checking
-  // |prefs::kEnabled| is set to true, |prefs::kIdleThreshold| does not exist,
-  // |prefs::kVersion| does not exist and it is not the first time the browser
-  // has run for this user
+  // |prefs::kEnabled| is set to true, |prefs::kIdleTimeThreshold| does not
+  // exist, |prefs::kVersion| does not exist and it is not the first time the
+  // browser has run for this user
 #if !defined(OS_ANDROID)
   return GetBooleanPref(ads::prefs::kEnabled) &&
-         !PrefExists(ads::prefs::kIdleThreshold) &&
+         !PrefExists(ads::prefs::kIdleTimeThreshold) &&
          !PrefExists(prefs::kVersion) && !first_run::IsChromeFirstRun();
 #else
   return false;
@@ -1647,7 +1668,7 @@ void AdsServiceImpl::OnPrefsChanged(const std::string& pref) {
 
     // Record P3A.
     brave_rewards::UpdateAdsP3AOnPreferenceChange(profile_->GetPrefs(), pref);
-  } else if (pref == ads::prefs::kIdleThreshold) {
+  } else if (pref == ads::prefs::kIdleTimeThreshold) {
     StartCheckIdleStateTimer();
   } else if (pref == brave_rewards::prefs::kWalletBrave) {
     OnWalletUpdated();
