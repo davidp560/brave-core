@@ -471,19 +471,6 @@ void AdsImpl::InitializeStep5(const Result result,
     return;
   }
 
-  const auto initialize_step_6_callback =
-      std::bind(&AdsImpl::InitializeStep6, this, std::placeholders::_1,
-                std::move(callback));
-  conversions_->Initialize(initialize_step_6_callback);
-}
-
-void AdsImpl::InitializeStep6(const Result result,
-                              InitializeCallback callback) {
-  if (result != SUCCESS) {
-    callback(FAILED);
-    return;
-  }
-
   is_initialized_ = true;
 
   BLOG(1, "Successfully initialized ads");
@@ -620,8 +607,10 @@ void AdsImpl::OnAdTransfer(const AdInfo& ad) {
   account_->Deposit(ad.creative_instance_id, ConfirmationType::kTransferred);
 }
 
-void AdsImpl::OnConversion(const std::string& creative_instance_id) {
-  account_->Deposit(creative_instance_id, ConfirmationType::kConversion);
+void AdsImpl::OnConversion(
+    const ConversionQueueItemInfo& conversion_queue_item) {
+  account_->Deposit(conversion_queue_item.creative_instance_id,
+                    ConfirmationType::kConversion);
 }
 
 }  // namespace ads

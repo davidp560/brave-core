@@ -30,13 +30,6 @@ class BatAdsConversionsTest : public UnitTestBase {
 
   ~BatAdsConversionsTest() override = default;
 
-  void SetUp() override {
-    UnitTestBase::SetUp();
-
-    conversions_->Initialize(
-        [](const Result result) { ASSERT_EQ(Result::SUCCESS, result); });
-  }
-
   void SaveConversions(const ConversionList& conversions) {
     conversions_database_table_->Save(conversions, [](const Result result) {
       ASSERT_EQ(Result::SUCCESS, result);

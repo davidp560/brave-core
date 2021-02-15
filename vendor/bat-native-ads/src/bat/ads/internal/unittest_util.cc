@@ -21,6 +21,7 @@
 #include "base/strings/stringprintf.h"
 #include "base/strings/utf_string_conversions.h"
 #include "base/time/time.h"
+#include "base/time/time_to_iso8601.h"
 #include "bat/ads/internal/ads_client_mock.h"
 #include "bat/ads/internal/logging.h"
 #include "bat/ads/internal/time_formatting_util.h"
@@ -104,7 +105,7 @@ bool ParseTimeTag(std::string* value) {
     return false;
   }
 
-  *value = TimeToISO8601(time);
+  *value = base::TimeToISO8601(time);
 
   return true;
 }
@@ -701,7 +702,8 @@ int64_t DistantPast() {
 
 std::string DistantPastAsISO8601() {
   const int64_t distant_past = DistantPast();
-  return TimestampToISO8601(distant_past);
+  const base::Time time = base::Time::FromDoubleT(distant_past);
+  return base::TimeToISO8601(time);
 }
 
 int64_t Now() {
@@ -710,7 +712,7 @@ int64_t Now() {
 
 std::string NowAsISO8601() {
   const base::Time time = base::Time::Now();
-  return TimeToISO8601(time);
+  return base::TimeToISO8601(time);
 }
 
 int64_t DistantFuture() {
@@ -719,7 +721,8 @@ int64_t DistantFuture() {
 
 std::string DistantFutureAsISO8601() {
   const int64_t distant_future = DistantFuture();
-  return TimestampToISO8601(distant_future);
+  const base::Time time = base::Time::FromDoubleT(distant_future);
+  return base::TimeToISO8601(time);
 }
 
 }  // namespace ads

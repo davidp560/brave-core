@@ -217,7 +217,6 @@ class AdsImpl : public Ads,
   void InitializeStep3(const Result result, InitializeCallback callback);
   void InitializeStep4(const Result result, InitializeCallback callback);
   void InitializeStep5(const Result result, InitializeCallback callback);
-  void InitializeStep6(const Result result, InitializeCallback callback);
 
   void CleanupAdEvents();
 
@@ -251,7 +250,8 @@ class AdsImpl : public Ads,
   void OnAdTransfer(const AdInfo& ad) override;
 
   // ConversionsObserver implementation
-  void OnConversion(const std::string& creative_instance_id) override;
+  void OnConversion(
+      const ConversionQueueItemInfo& conversion_queue_item) override;
 };
 
 }  // namespace ads
