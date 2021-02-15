@@ -121,7 +121,7 @@ void WalletBalance::OnGetUnblindedTokens(
 void WalletBalance::ExternalWallets(
     type::BalancePtr balance,
     ledger::FetchBalanceCallback callback) {
-  FetchBalanceBitflyer(std::move(balance), callback);
+  FetchBalanceUphold(std::move(balance), callback);
 }
 
 void WalletBalance::FetchBalanceUphold(
@@ -164,7 +164,7 @@ void WalletBalance::OnFetchBalanceUphold(
 
   info_ptr->wallets.insert(std::make_pair(constant::kWalletUphold, balance));
   info_ptr->total += balance;
-  callback(result, std::move(info_ptr));
+  FetchBalanceBitflyer(std::move(info_ptr), callback);
 }
 
 void WalletBalance::FetchBalanceBitflyer(
