@@ -1,0 +1,12 @@
+diff --git a/third_party/blink/renderer/platform/weborigin/security_origin.cc b/third_party/blink/renderer/platform/weborigin/security_origin.cc
+index b4102e4638fa5801f5d0f3455e57a71414fc5432..cfbab7e4352c2363bde4bdb955ba02197d0b0aa9 100644
+--- a/third_party/blink/renderer/platform/weborigin/security_origin.cc
++++ b/third_party/blink/renderer/platform/weborigin/security_origin.cc
+@@ -544,6 +544,7 @@ String SecurityOrigin::ToRawString() const {
+ }
+ 
+ void SecurityOrigin::BuildRawString(StringBuilder& builder) const {
++  BRAVE_IPFS_ORIGINS_CHECK
+   builder.Append(protocol_);
+   builder.Append("://");
+   builder.Append(host_);
