@@ -135,7 +135,7 @@ void WalletBalance::FetchBalanceUphold(
 
   auto wallet = ledger_->uphold()->GetWallet();
   if (!wallet) {
-    callback(type::Result::LEDGER_OK, std::move(balance));
+    FetchBalanceBitflyer(std::move(info_ptr), callback);
     return;
   }
 
@@ -158,7 +158,7 @@ void WalletBalance::OnFetchBalanceUphold(
 
   if (result == type::Result::LEDGER_ERROR) {
     BLOG(0, "Can't get uphold balance");
-    callback(type::Result::LEDGER_ERROR, std::move(info_ptr));
+    FetchBalanceBitflyer(std::move(info_ptr), callback);
     return;
   }
 
