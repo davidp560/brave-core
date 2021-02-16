@@ -17,7 +17,7 @@ class LedgerImpl;
 
 namespace bitflyer {
 
-const char kUrlStaging[] = "http://staging-url-here.jp";
+const char kUrlStaging[] = BITFLYER_STAGING_URL;
 const char kUrlProduction[] = "https://bitflyer.jp";
 const char kClientIdStaging[] = "6cd6f1a070afcd467e198c8039b2c97b";
 const char kClientIdProduction[] = "6cd6f1a070afcd467e198c8039b2c97b";
