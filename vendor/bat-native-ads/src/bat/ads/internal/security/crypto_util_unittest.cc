@@ -3,14 +3,19 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#include "bat/ads/internal/security/security_util.h"
+#include "bat/ads/internal/security/crypto_util.h"
 
 #include "base/base64.h"
+#include "bat/ads/internal/security/verifiable_conversion_envelope_info.h"
+#include "bat/ads/internal/conversions/verifiable_conversion_info.h"
 #include "testing/gtest/include/gtest/gtest.h"
 
 // npm run test -- brave_unit_tests --filter=BatAds*
 
 namespace ads {
+namespace security {
+
+const char kAlgorithm[] = "x25519-xsalsa20-poly1305";
 
 TEST(BatAdsSecurityUtilsTest, Sign) {
   // Arrange
@@ -171,4 +176,140 @@ TEST(BatAdsSecurityUtilsTest, Sha256WithEmptyString) {
   EXPECT_TRUE(sha256.empty());
 }
 
+TEST(BatAdsSecurityUtilsTest, ConversionEnvelopeAlgorithm) {
+  // Arrange
+  const std::string advertiser_pk_base64 =
+      "ofIveUY/bM7qlL9eIkAv/xbjDItFs1xRTTYKRZZsPHI=";
+  const std::string advertiser_sk_base64 =
+      "Ete7+aKfrX25gt0eN4kBV1LqeF9YmB1go8OqnGXUGG4=";
+  const std::string message = "smartbrownfoxes16";
+
+  VerifiableConversionInfo verifiable_conversion;
+  verifiable_conversion.id = message;
+  verifiable_conversion.public_key = advertiser_pk_base64;
+
+  // Act
+  VerifiableConversionEnvelopeInfo verifiable_conversion_envelope =
+      EncryptAndEncodeVerifiableConversion(verifiable_conversion);
+
+  // Assert
+  EXPECT_EQ(verifiable_conversion_envelope.algorithm, kAlgorithm);
+}
+
+TEST(BatAdsSecurityUtilsTest, ConversionEnvelopeWithShortMessage) {
+  // Arrange
+  const std::string advertiser_pk_base64 =
+      "ofIveUY/bM7qlL9eIkAv/xbjDItFs1xRTTYKRZZsPHI=";
+  const std::string advertiser_sk_base64 =
+      "Ete7+aKfrX25gt0eN4kBV1LqeF9YmB1go8OqnGXUGG4=";
+  const std::string message = "shortmessage";
+
+  VerifiableConversionInfo verifiable_conversion;
+  verifiable_conversion.id = message;
+  verifiable_conversion.public_key = advertiser_pk_base64;
+
+  // Act
+  VerifiableConversionEnvelopeInfo verifiable_conversion_envelope =
+      EncryptAndEncodeVerifiableConversion(verifiable_conversion);
+  std::string result =
+      DecodeAndDecryptVerifiableConversionEnvelope(
+          verifiable_conversion_envelope, advertiser_sk_base64);
+
+  // Assert
+  EXPECT_TRUE(result.empty());
+}
+
+TEST(BatAdsSecurityUtilsTest, ConversionEnvelopeWithLongMessage) {
+  // Arrange
+  const std::string advertiser_pk_base64 =
+      "ofIveUY/bM7qlL9eIkAv/xbjDItFs1xRTTYKRZZsPHI=";
+  const std::string advertiser_sk_base64 =
+      "Ete7+aKfrX25gt0eN4kBV1LqeF9YmB1go8OqnGXUGG4=";
+  const std::string message = "thismessageistoolongthismessageistoolong";
+
+  VerifiableConversionInfo verifiable_conversion;
+  verifiable_conversion.id = message;
+  verifiable_conversion.public_key = advertiser_pk_base64;
+
+  // Act
+  VerifiableConversionEnvelopeInfo verifiable_conversion_envelope =
+      EncryptAndEncodeVerifiableConversion(verifiable_conversion);
+  std::string result =
+      DecodeAndDecryptVerifiableConversionEnvelope(
+          verifiable_conversion_envelope, advertiser_sk_base64);
+
+  // Assert
+  EXPECT_TRUE(result.empty());
+}
+
+TEST(BatAdsSecurityUtilsTest, ConversionEnvelopeWithInvalidMessage) {
+  // Arrange
+  const std::string advertiser_pk_base64 =
+      "ofIveUY/bM7qlL9eIkAv/xbjDItFs1xRTTYKRZZsPHI=";
+  const std::string advertiser_sk_base64 =
+      "Ete7+aKfrX25gt0eN4kBV1LqeF9YmB1go8OqnGXUGG4=";
+  const std::string message = "smart brown foxes 16";
+
+  VerifiableConversionInfo verifiable_conversion;
+  verifiable_conversion.id = message;
+  verifiable_conversion.public_key = advertiser_pk_base64;
+
+  // Act
+  VerifiableConversionEnvelopeInfo verifiable_conversion_envelope =
+      EncryptAndEncodeVerifiableConversion(verifiable_conversion);
+  std::string result =
+      DecodeAndDecryptVerifiableConversionEnvelope(
+          verifiable_conversion_envelope, advertiser_sk_base64);
+
+  // Assert
+  EXPECT_TRUE(result.empty());
+}
+
+TEST(BatAdsSecurityUtilsTest, ConversionEnvelopeWithInvalidPublicKey) {
+  // Arrange
+  const std::string message = "smartbrownfoxes42";
+  const std::string advertiser_pk_base64 =
+      "ofIveUY/bM7qlL9eIkAv/xbjDItFs1xRTTYKRZZsPHI@";
+  const std::string advertiser_sk_base64 =
+      "Ete7+aKfrX25gt0eN4kBV1LqeF9YmB1go8OqnGXUGG4=";
+
+  VerifiableConversionInfo verifiable_conversion;
+  verifiable_conversion.id = message;
+  verifiable_conversion.public_key = advertiser_pk_base64;
+
+  // Act
+  VerifiableConversionEnvelopeInfo verifiable_conversion_envelope =
+      EncryptAndEncodeVerifiableConversion(verifiable_conversion);
+  std::string result =
+      DecodeAndDecryptVerifiableConversionEnvelope(
+          verifiable_conversion_envelope, advertiser_sk_base64);
+
+  // Assert
+  EXPECT_TRUE(result.empty());
+}
+
+TEST(BatAdsSecurityUtilsTest, ConversionEnvelope) {
+  // Arrange
+  const std::string message = "smartbrownfoxes42";
+  const std::string advertiser_pk_base64 =
+      "ofIveUY/bM7qlL9eIkAv/xbjDItFs1xRTTYKRZZsPHI=";
+  const std::string advertiser_sk_base64 =
+      "Ete7+aKfrX25gt0eN4kBV1LqeF9YmB1go8OqnGXUGG4=";
+
+  VerifiableConversionInfo verifiable_conversion;
+  verifiable_conversion.id = message;
+  verifiable_conversion.public_key = advertiser_pk_base64;
+
+  // Act
+  VerifiableConversionEnvelopeInfo verifiable_conversion_envelope =
+      EncryptAndEncodeVerifiableConversion(verifiable_conversion);
+  std::string result =
+      DecodeAndDecryptVerifiableConversionEnvelope(
+          verifiable_conversion_envelope, advertiser_sk_base64);
+
+  // Assert
+  EXPECT_EQ(message, result);
+}
+
+}  // namespace security
 }  // namespace ads

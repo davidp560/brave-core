@@ -21,6 +21,7 @@ struct ConversionQueueItemInfo {
   uint64_t timestamp_in_seconds = 0;
   std::string creative_instance_id;
   std::string creative_set_id;
+  // TODO(Moritz Haller): add verifiable_conversion_envelope
 
   bool IsValid() const;
 };
