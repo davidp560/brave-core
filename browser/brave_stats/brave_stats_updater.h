@@ -22,7 +22,7 @@ class PrefService;
 namespace base {
 class OneShotTimer;
 class RepeatingTimer;
-}
+}  // namespace base
 
 namespace net {
 class HttpResponseHeaders;
@@ -45,18 +45,14 @@ class BraveStatsUpdater {
   void Stop();
   bool MaybeDoThresholdPing(int score);
 
-  using StatsUpdatedCallback =
-      base::RepeatingCallback<void(const GURL& url)>;
+  using StatsUpdatedCallback = base::RepeatingCallback<void(const GURL& url)>;
 
-  void SetStatsUpdatedCallback(
-      StatsUpdatedCallback stats_updated_callback);
-  void SetStatsThresholdCallback(
-      StatsUpdatedCallback stats_threshold_callback);
+  void SetStatsUpdatedCallback(StatsUpdatedCallback stats_updated_callback);
+  void SetStatsThresholdCallback(StatsUpdatedCallback stats_threshold_callback);
 
  private:
   GURL BuildStatsEndpoint(const std::string& path);
-  void OnThresholdLoaderComplete(
-      scoped_refptr<net::HttpResponseHeaders>);
+  void OnThresholdLoaderComplete(scoped_refptr<net::HttpResponseHeaders>);
   // Invoked from SimpleURLLoader after download is complete.
   void OnSimpleLoaderComplete(
       std::unique_ptr<brave_stats::BraveStatsUpdaterParams>
@@ -69,11 +65,16 @@ class BraveStatsUpdater {
   // Invoked after browser has initialized with referral server.
   void OnReferralInitialization();
 
+  // Invoked after brave ads initializes
+  void OnDetectUncertainFuture(const bool is_uncertain_future);
+
+  void DetectUncertainFuture();
   void StartServerPingStartupTimer();
   void QueueServerPing();
   void SendUserTriggeredPing();
   void SendServerPing();
 
+  bool IsAdsEnabled();
   bool IsReferralInitialized();
   bool HasDoneThresholdPing();
   void DisableThresholdPing();
@@ -81,6 +82,8 @@ class BraveStatsUpdater {
   friend class ::BraveStatsUpdaterBrowserTest;
 
   int threshold_score_ = 0;
+  bool is_uncertain_future_ = false;
+  bool stats_startup_complete_ = false;
   PrefService* pref_service_;
   std::string usage_server_;
   StatsUpdatedCallback stats_updated_callback_;
@@ -89,6 +92,7 @@ class BraveStatsUpdater {
   std::unique_ptr<base::OneShotTimer> server_ping_startup_timer_;
   std::unique_ptr<base::RepeatingTimer> server_ping_periodic_timer_;
   std::unique_ptr<PrefChangeRegistrar> pref_change_registrar_;
+  base::RepeatingClosure stats_preconditions_barrier_;
 
   DISALLOW_COPY_AND_ASSIGN(BraveStatsUpdater);
 };

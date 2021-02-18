@@ -72,7 +72,7 @@ TEST_F(BraveStatsUpdaterTest, IsDailyUpdateNeededLastCheckedYesterday) {
   GetLocalState()->SetString(kLastCheckYMD, kYesterday);
 
   brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-      GetLocalState(), GetProfilePrefs(), kToday, kThisWeek, kThisMonth);
+      GetLocalState(), GetProfilePrefs(), false, kToday, kThisWeek, kThisMonth);
   ASSERT_EQ(brave_stats_updater_params.GetDailyParam(), "true");
   brave_stats_updater_params.SavePrefs();
 
@@ -83,7 +83,7 @@ TEST_F(BraveStatsUpdaterTest, IsDailyUpdateNeededLastCheckedToday) {
   GetLocalState()->SetString(kLastCheckYMD, kToday);
 
   brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-      GetLocalState(), GetProfilePrefs(), kToday, kThisWeek, kThisMonth);
+      GetLocalState(), GetProfilePrefs(), false, kToday, kThisWeek, kThisMonth);
   ASSERT_EQ(brave_stats_updater_params.GetDailyParam(), "false");
   brave_stats_updater_params.SavePrefs();
 
@@ -94,7 +94,7 @@ TEST_F(BraveStatsUpdaterTest, IsDailyUpdateNeededLastCheckedTomorrow) {
   GetLocalState()->SetString(kLastCheckYMD, kTomorrow);
 
   brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-      GetLocalState(), GetProfilePrefs(), kToday, kThisWeek, kThisMonth);
+      GetLocalState(), GetProfilePrefs(), false, kToday, kThisWeek, kThisMonth);
   ASSERT_EQ(brave_stats_updater_params.GetDailyParam(), "false");
   brave_stats_updater_params.SavePrefs();
 
@@ -105,7 +105,7 @@ TEST_F(BraveStatsUpdaterTest, IsWeeklyUpdateNeededLastCheckedLastWeek) {
   GetLocalState()->SetInteger(kLastCheckWOY, kLastWeek);
 
   brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-      GetLocalState(), GetProfilePrefs(), kToday, kThisWeek, kThisMonth);
+      GetLocalState(), GetProfilePrefs(), false, kToday, kThisWeek, kThisMonth);
   ASSERT_EQ(brave_stats_updater_params.GetWeeklyParam(), "true");
   brave_stats_updater_params.SavePrefs();
 
@@ -116,7 +116,7 @@ TEST_F(BraveStatsUpdaterTest, IsWeeklyUpdateNeededLastCheckedThisWeek) {
   GetLocalState()->SetInteger(kLastCheckWOY, kThisWeek);
 
   brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-      GetLocalState(), GetProfilePrefs(), kToday, kThisWeek, kThisMonth);
+      GetLocalState(), GetProfilePrefs(), false, kToday, kThisWeek, kThisMonth);
   ASSERT_EQ(brave_stats_updater_params.GetWeeklyParam(), "false");
   brave_stats_updater_params.SavePrefs();
 
@@ -127,7 +127,7 @@ TEST_F(BraveStatsUpdaterTest, IsWeeklyUpdateNeededLastCheckedNextWeek) {
   GetLocalState()->SetInteger(kLastCheckWOY, kNextWeek);
 
   brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-      GetLocalState(), GetProfilePrefs(), kToday, kThisWeek, kThisMonth);
+      GetLocalState(), GetProfilePrefs(), false, kToday, kThisWeek, kThisMonth);
   ASSERT_EQ(brave_stats_updater_params.GetWeeklyParam(), "true");
   brave_stats_updater_params.SavePrefs();
 
@@ -138,7 +138,7 @@ TEST_F(BraveStatsUpdaterTest, IsMonthlyUpdateNeededLastCheckedLastMonth) {
   GetLocalState()->SetInteger(kLastCheckMonth, kLastMonth);
 
   brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-      GetLocalState(), GetProfilePrefs(), kToday, kThisWeek, kThisMonth);
+      GetLocalState(), GetProfilePrefs(), false, kToday, kThisWeek, kThisMonth);
   ASSERT_EQ(brave_stats_updater_params.GetMonthlyParam(), "true");
   brave_stats_updater_params.SavePrefs();
 
@@ -149,7 +149,7 @@ TEST_F(BraveStatsUpdaterTest, IsMonthlyUpdateNeededLastCheckedThisMonth) {
   GetLocalState()->SetInteger(kLastCheckMonth, kThisMonth);
 
   brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-      GetLocalState(), GetProfilePrefs(), kToday, kThisWeek, kThisMonth);
+      GetLocalState(), GetProfilePrefs(), false, kToday, kThisWeek, kThisMonth);
   ASSERT_EQ(brave_stats_updater_params.GetMonthlyParam(), "false");
   brave_stats_updater_params.SavePrefs();
 
@@ -160,7 +160,7 @@ TEST_F(BraveStatsUpdaterTest, IsMonthlyUpdateNeededLastCheckedNextMonth) {
   GetLocalState()->SetInteger(kLastCheckMonth, kNextMonth);
 
   brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-      GetLocalState(), GetProfilePrefs(), kToday, kThisWeek, kThisMonth);
+      GetLocalState(), GetProfilePrefs(), false, kToday, kThisWeek, kThisMonth);
   ASSERT_EQ(brave_stats_updater_params.GetMonthlyParam(), "true");
   brave_stats_updater_params.SavePrefs();
 
@@ -169,16 +169,28 @@ TEST_F(BraveStatsUpdaterTest, IsMonthlyUpdateNeededLastCheckedNextMonth) {
 
 TEST_F(BraveStatsUpdaterTest, HasAdsDisabled) {
   brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-      GetLocalState(), GetProfilePrefs(), kToday, kThisWeek, kThisMonth);
+      GetLocalState(), GetProfilePrefs(), false, kToday, kThisWeek, kThisMonth);
   SetEnableAds(false);
   ASSERT_EQ(brave_stats_updater_params.GetAdsEnabledParam(), "false");
 }
 
 TEST_F(BraveStatsUpdaterTest, HasAdsEnabled) {
   brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-      GetLocalState(), GetProfilePrefs(), kToday, kThisWeek, kThisMonth);
+      GetLocalState(), GetProfilePrefs(), false, kToday, kThisWeek, kThisMonth);
   SetEnableAds(true);
   ASSERT_EQ(brave_stats_updater_params.GetAdsEnabledParam(), "true");
+}
+
+TEST_F(BraveStatsUpdaterTest, IsUncertainFutureDisabled) {
+  brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
+      GetLocalState(), GetProfilePrefs(), false, kToday, kThisWeek, kThisMonth);
+  ASSERT_EQ(brave_stats_updater_params.GetUncertainFutureParam(), "false");
+}
+
+TEST_F(BraveStatsUpdaterTest, IsUncertainFutureEnabled) {
+  brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
+      GetLocalState(), GetProfilePrefs(), true, kToday, kThisWeek, kThisMonth);
+  ASSERT_EQ(brave_stats_updater_params.GetUncertainFutureParam(), "true");
 }
 
 TEST_F(BraveStatsUpdaterTest, HasDateOfInstallationFirstRun) {
@@ -199,7 +211,7 @@ TEST_F(BraveStatsUpdaterTest, HasDateOfInstallationFirstRun) {
   SetCurrentTimeForTest(current_time);
 
   brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-      GetLocalState(), GetProfilePrefs(), kToday, kThisWeek, kThisMonth);
+      GetLocalState(), GetProfilePrefs(), false, kToday, kThisWeek, kThisMonth);
   ASSERT_EQ(brave_stats_updater_params.GetDateOfInstallationParam(),
             "2018-11-04");
 }
@@ -225,7 +237,7 @@ TEST_F(BraveStatsUpdaterTest, HasDailyRetention) {
 
   SetCurrentTimeForTest(dtoi_time);
   brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-      GetLocalState(), GetProfilePrefs(), kToday, kThisWeek, kThisMonth);
+      GetLocalState(), GetProfilePrefs(), false, kToday, kThisWeek, kThisMonth);
   SetCurrentTimeForTest(current_time);
   ASSERT_EQ(brave_stats_updater_params.GetDateOfInstallationParam(),
             "2018-11-04");
@@ -252,7 +264,7 @@ TEST_F(BraveStatsUpdaterTest, HasDailyRetentionExpiration) {
 
   SetCurrentTimeForTest(dtoi_time);
   brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-      GetLocalState(), GetProfilePrefs(), kToday, kThisWeek, kThisMonth);
+      GetLocalState(), GetProfilePrefs(), false, kToday, kThisWeek, kThisMonth);
   SetCurrentTimeForTest(current_time);
   ASSERT_EQ(brave_stats_updater_params.GetDateOfInstallationParam(), "null");
 }
@@ -281,7 +293,7 @@ TEST_F(BraveStatsUpdaterTest, IsWeeklyUpdateNeededOnMondayLastCheckedOnSunday) {
 
     SetCurrentTimeForTest(current_time);
     brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-        GetLocalState(), GetProfilePrefs());
+        GetLocalState(), GetProfilePrefs(), false);
 
     // Make sure that the weekly param was set to true, since this is
     // a new ISO week (#44)
@@ -301,7 +313,7 @@ TEST_F(BraveStatsUpdaterTest, IsWeeklyUpdateNeededOnMondayLastCheckedOnSunday) {
 
     SetCurrentTimeForTest(current_time);
     brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-        GetLocalState(), GetProfilePrefs());
+        GetLocalState(), GetProfilePrefs(), false);
 
     // Make sure that the weekly param was set to true, since this is
     // a new ISO week (#45)
@@ -321,7 +333,7 @@ TEST_F(BraveStatsUpdaterTest, IsWeeklyUpdateNeededOnMondayLastCheckedOnSunday) {
 
     SetCurrentTimeForTest(current_time);
     brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-        GetLocalState(), GetProfilePrefs());
+        GetLocalState(), GetProfilePrefs(), false);
 
     // Make sure that the weekly param was set to false, since this is
     // still the same ISO week (#45)
@@ -353,7 +365,7 @@ TEST_F(BraveStatsUpdaterTest, HasCorrectWeekOfInstallation) {
 
     // Make sure that week of installation is previous Monday
     brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-        GetLocalState(), GetProfilePrefs());
+        GetLocalState(), GetProfilePrefs(), false);
     ASSERT_EQ(brave_stats_updater_params.GetWeekOfInstallationParam(),
               "2019-03-18");
   }
@@ -375,7 +387,7 @@ TEST_F(BraveStatsUpdaterTest, HasCorrectWeekOfInstallation) {
     // Make sure that week of installation is today, since today is a
     // Monday
     brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-        GetLocalState(), GetProfilePrefs());
+        GetLocalState(), GetProfilePrefs(), false);
     ASSERT_EQ(brave_stats_updater_params.GetWeekOfInstallationParam(),
               "2019-03-25");
   }
@@ -396,7 +408,7 @@ TEST_F(BraveStatsUpdaterTest, HasCorrectWeekOfInstallation) {
 
     // Make sure that week of installation is previous Monday
     brave_stats::BraveStatsUpdaterParams brave_stats_updater_params(
-        GetLocalState(), GetProfilePrefs());
+        GetLocalState(), GetProfilePrefs(), false);
     ASSERT_EQ(brave_stats_updater_params.GetWeekOfInstallationParam(),
               "2019-03-25");
   }
